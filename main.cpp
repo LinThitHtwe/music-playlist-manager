@@ -85,14 +85,6 @@ void ShowEmptyPlaylistOptions();
 // Duplicate Playlist
 void DuplicatePlaylist(Playlist *&head);
 
-// Delete Functions
-void DeleteSongFromPlaylist(Playlist *playlist);
-void DeletePlaylist(Playlist *&head);
-void ShowDeleteSongMenu(Playlist *playlist);
-void ShowDeletePlaylistMenu(Playlist *&head);
-void HandleDeleteSong(Playlist *playlist);
-void HandleDeletePlaylist(Playlist *&head);
-
 int main()
 {
     Playlist *playlists = NULL;
@@ -302,7 +294,7 @@ void HandleMainMenu(Playlist *&playlists, int choice)
             DuplicatePlaylist(playlists);
             break;
         case 4:
-            HandleDeletePlaylist(playlists);
+            cout << "Delete playlist functionality not yet implemented." << endl;
             break;
     }
 }
@@ -454,9 +446,6 @@ void HandlePlaylistMenu(Playlist *playlist)
                 system("cls");
                 DisplayLoading();
                 break;
-            case 6:
-                HandleDeleteSong(playlist);
-                break;
             case 0:
                 cout << "Returning..." << endl;
                 system("cls");
@@ -466,7 +455,7 @@ void HandlePlaylistMenu(Playlist *playlist)
                 cout << RED_COLOR << "Invalid choice. Try again." << WHITE_COLOR << endl;
         }
         
-        if (choice != 0 && choice != 5 && choice != 6)
+        if (choice != 0 && choice != 5)
         {
             cout << endl << "Press Enter to continue...";
             cin.ignore();
@@ -736,7 +725,6 @@ void ShowSongOptions()
     cout << "||  [3] Show first song only                                        ||" << endl;
     cout << "||  [4] Show last song only                                         ||" << endl;
     cout << "||  [5] Search songs                                                ||" << endl;
-    cout << "||  [6] Delete song                                                 ||" << endl;
     cout << "||  [0] Return to previous menu                                     ||" << endl;
     cout << "||                                                                  ||" << endl;
     cout << "======================================================================" << endl;
@@ -942,234 +930,6 @@ void HandleSearchMenu(Playlist *playlist)
         }
         
     } while (choice != 0);
-}
-
-// ==================== DELETE FUNCTIONS ====================
-
-void ShowDeleteSongMenu(Playlist *playlist)
-{
-    cout << endl;
-    cout << "========================= DELETE SONG =========================" << endl;
-    
-    if (!playlist || !playlist->songHead)
-    {
-        cout << RED_COLOR << "This playlist has no songs to delete." << WHITE_COLOR << endl;
-        cout << "=======================================================================" << endl;
-        return;
-    }
-    
-    Song *current = playlist->songHead;
-    int index = 1;
-    
-    cout << "Songs in playlist \"" << playlist->name << "\":" << endl;
-    while (current)
-    {
-        cout << index << ". " << current->title << " by " << current->artist << " [" << current->genre << "]" << endl;
-        current = current->next;
-        index++;
-    }
-    
-    cout << "=======================================================================" << endl;
-}
-
-void HandleDeleteSong(Playlist *playlist)
-{
-    if (!playlist || !playlist->songHead)
-    {
-        system("cls");
-        DisplayLoading();
-        cout << RED_COLOR << "This playlist has no songs to delete." << WHITE_COLOR << endl;
-        cout << endl << "Press Enter to continue...";
-        cin.ignore();
-        cin.get();
-        system("cls");
-        DisplayLoading();
-        return;
-    }
-    
-    system("cls");
-    DisplayLoading();
-    ShowDeleteSongMenu(playlist);
-    
-    if (!playlist->songHead) return; // Check again after display
-    
-    int songCount = playlist->songCount;
-    int choice;
-    
-    do
-    {
-        cout << "Enter song number to delete (1-" << songCount << ") or 0 to cancel: ";
-        cin >> choice;
-        
-        if (choice < 0 || choice > songCount)
-        {
-            cout << RED_COLOR << "Invalid choice. Please try again." << WHITE_COLOR << endl;
-        }
-    } while (choice < 0 || choice > songCount);
-    
-    if (choice == 0)
-    {
-        system("cls");
-        DisplayLoading();
-        return;
-    }
-    
-    // Find the song to delete
-    Song *current = playlist->songHead;
-    Song *prev = NULL;
-    
-    for (int i = 1; i < choice; i++)
-    {
-        prev = current;
-        current = current->next;
-    }
-    
-    // Delete the song
-    if (prev == NULL) // Deleting first song
-    {
-        playlist->songHead = current->next;
-        if (playlist->songHead)
-            playlist->songHead->prev = NULL;
-    }
-    else // Deleting middle or last song
-    {
-        prev->next = current->next;
-        if (current->next)
-            current->next->prev = prev;
-    }
-    
-    string deletedTitle = current->title;
-    delete current;
-    playlist->songCount--;
-    
-    cout << endl << GREEN_COLOR << "Song \"" << deletedTitle << "\" deleted successfully!" << WHITE_COLOR << endl;
-    cout << "Press Enter to continue...";
-    cin.ignore();
-    cin.get();
-    system("cls");
-    DisplayLoading();
-}
-
-void ShowDeletePlaylistMenu(Playlist *&head)
-{
-    cout << endl;
-    cout << "========================= DELETE PLAYLIST =========================" << endl;
-    
-    if (!head)
-    {
-        cout << RED_COLOR << "No playlists available to delete." << WHITE_COLOR << endl;
-        cout << "=======================================================================" << endl;
-        return;
-    }
-    
-    Playlist *current = head;
-    int index = 1;
-    int playlistCount = 0;
-    
-    while (current)
-    {
-        cout << index << ". " << current->name << " (" << current->songCount << " songs)" << endl;
-        current = current->next;
-        index++;
-        playlistCount++;
-    }
-    
-    cout << "=======================================================================" << endl;
-    cout << "Total playlists: " << playlistCount << endl;
-    cout << "=======================================================================" << endl;
-}
-
-void HandleDeletePlaylist(Playlist *&head)
-{
-    if (!head)
-    {
-        system("cls");
-        DisplayLoading();
-        cout << RED_COLOR << "No playlists available to delete." << WHITE_COLOR << endl;
-        cout << endl << "Press Enter to continue...";
-        cin.ignore();
-        cin.get();
-        system("cls");
-        DisplayLoading();
-        return;
-    }
-    
-    system("cls");
-    DisplayLoading();
-    ShowDeletePlaylistMenu(head);
-    
-    if (!head) return; // Check again after display
-    
-    int playlistCount = 0;
-    Playlist *temp = head;
-    while (temp)
-    {
-        playlistCount++;
-        temp = temp->next;
-    }
-    
-    int choice;
-    
-    do
-    {
-        cout << "Enter playlist number to delete (1-" << playlistCount << ") or 0 to cancel: ";
-        cin >> choice;
-        
-        if (choice < 0 || choice > playlistCount)
-        {
-            cout << RED_COLOR << "Invalid choice. Please try again." << WHITE_COLOR << endl;
-        }
-    } while (choice < 0 || choice > playlistCount);
-    
-    if (choice == 0)
-    {
-        system("cls");
-        DisplayLoading();
-        return;
-    }
-    
-    // Find the playlist to delete
-    Playlist *current = head;
-    Playlist *prev = NULL;
-    
-    for (int i = 1; i < choice; i++)
-    {
-        prev = current;
-        current = current->next;
-    }
-    
-    // Delete all songs in the playlist first
-    Song *song = current->songHead;
-    while (song)
-    {
-        Song *temp = song;
-        song = song->next;
-        delete temp;
-    }
-    
-    // Delete the playlist
-    if (prev == NULL) // Deleting first playlist
-    {
-        head = current->next;
-        if (head)
-            head->prev = NULL;
-    }
-    else // Deleting middle or last playlist
-    {
-        prev->next = current->next;
-        if (current->next)
-            current->next->prev = prev;
-    }
-    
-    string deletedName = current->name;
-    delete current;
-    
-    cout << endl << GREEN_COLOR << "Playlist \"" << deletedName << "\" deleted successfully!" << WHITE_COLOR << endl;
-    cout << "Press Enter to continue...";
-    cin.ignore();
-    cin.get();
-    system("cls");
-    DisplayLoading();
 }
 
 // ==================== COPY PLAYLIST ====================
